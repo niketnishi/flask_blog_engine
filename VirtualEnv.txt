@@ -1,0 +1,32 @@
+printenv
+echo $PATH
+which python3
+cd ~
+pip3 install virtualenv
+
+mkdir .virtualenvs # Centrally managing all virtual envs
+cd .virtualenvs
+
+# Create virtualenv
+virtualenv -p python3 demo
+
+# Activate
+source demo/bin/activate
+
+# Set flask application file as environment variable
+export FLASK_APP=blog_engine.py		(on mac and linux use 'set' in place of 'export' in windows)
+
+# Another environment variable to see the changes in the application without stoping the server
+export FLASK_DEBUG=1
+
+# Deactivate
+deactivate
+
+# pip - Installing single library
+pip install flake8
+
+# pip - Installing from requirements.txt
+pip install -r requirements.txt
+
+# pip - Creating requirements.txt
+pip freeze > requirements.txt
