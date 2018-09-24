@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request, session, url_for, flash, redirect
 from flaskblogengine.forms import RegistrationForm, LoginForm   # Importing registration and login classes from forms.py
 from flaskblogengine.models import User, Post
-from flaskblogengine import app
-from flask_session import Session
+from flaskblogengine import app, db, bcrypt
+# from flask_session import Session
+from flask_login import login_user      # Maintains user session
 
-Session(app)
+# Session(app)
 
 posts = [
     {
@@ -36,8 +37,12 @@ def about():
 def register():
     form_obj = RegistrationForm()
     if form_obj.validate_on_submit():
-        flash(f'Account created for {form_obj.username.data}!', 'success')      # Flashes a message on submission
-        return redirect(url_for('home'))
+        hashed_password = bcrypt.generate_password_hash(form_obj.password.data).decode('utf-8')
+        user = User(username=form_obj.username.data, email=form_obj.email.data, password=hashed_password)
+        db.session.add(user)
+        db.session.commit()
+        flash('Your account has been created', 'success')      # Flashes a message on submission
+        return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form_obj)    # Passing registration object as form
 
 
@@ -45,8 +50,11 @@ def register():
 def login():
     form_obj = LoginForm()
     if form_obj.validate_on_submit():
-        if form_obj.email.data == 'niketnishi@gmail.com' and form_obj.password.data == 'password':
-            flash(f'You have logged in successfully!', 'success')      # Flashes a message on submission
+        user = User.query.filter_by(email=form_obj.email.data).first()
+        # if form_obj.email.data == 'niketnishi@gmail.com' and form_obj.password.data == 'password':
+        if user and bcrypt.check_password_hash(user.password, form_obj.password.data):
+            login_user(user, remember=form_obj.remember.data)
+        #     flash(f'You have logged in successfully!', 'success')      # Flashes a message on submission
             return redirect(url_for('home'))
         else:
             flash('Incorrect Username or Password!', 'danger')
