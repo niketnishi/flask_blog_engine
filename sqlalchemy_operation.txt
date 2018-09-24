@@ -1,0 +1,37 @@
+for creating database file system goto your virtual environment traverse to the directory of your blog engine and type
+>>> from blog_engine import db
+>>> db.create_all()
+Now you will notice that your database filesystem has been created named "site.db" as given in URI
+
+Adding users to the Database
+>>> from blog_engine import User, Post
+>>> user_1 = User(username='Niket', email='niketnishi@gmail.com', password='password')
+>>> db.session.add(user_1)
+>>> db.session.commit()
+
+Query to get records from Database
+>>> User.query.all()
+>>> User.query.first()
+>>> User.query.filter_by(username='Niket').all()
+>>> user = User.query.get(1)    # Returns the User object for the given 'id'
+>>> user.posts      # Returns a list of posts made by the user
+
+Creating Post data
+>>> post_1 = Post(title='Blog Post 1', content='First Blog Content!', user_id=user.id)
+>>> post_2 = Post(title='Blog Post 1', content='First Blog Content!', user_id=user.id)
+>>> db.session.add(post_1)
+>>> db.session.add(post_2)
+>>> db.session.commit()
+
+Iterating over a user's Post
+>>> for post in user.posts:
+        print(post.title)
+>>> post = Post.query.first()
+>>> post.user_id
+1
+>>> post.author     # Returns the object of the blog's user
+User('Niket', 'niketnishi@gmail.com', 'dafault.jpg')
+
+Clearing all the data from database and recreating the database
+>>> db.drop_all()
+>>> db.create_all()
