@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block heading %}
+    {{ legend }}
+{% endblock %}
+
+{% block body%}
+    <div>
+        <form action="" method="post">
+            {{ new_blog_obj.hidden_tag() }}
+            <fieldset>
+                <legend>{{ legend }}</legend>
+                <div>
+                    {{ new_blog_obj.title.label }}
+                    {% if new_blog_obj.title.errors %}
+                        {{ new_blog_obj.title(style="border: 1px solid #172c50;") }}
+                        <div>
+                            {% for error in new_blog_obj.title.errors%}
+                                <span style="color: red; font-size: 12px;">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ new_blog_obj.title }}
+                    {% endif %}
+                </div>
+                <div>
+                    {{ new_blog_obj.content.label }}
+                    {% if new_blog_obj.content.errors %}
+                        {{ new_blog_obj.content(style="border: 1px solid #172c50;") }}
+                        <div>
+                            {% for error in new_blog_obj.content.errors%}
+                                <span style="color: red; font-size: 12px;">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ new_blog_obj.content }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div>
+                {{ new_blog_obj.submit }}
+            </div>
+        </form>
+    </div>
+{% endblock %}

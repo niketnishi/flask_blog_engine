@@ -6,8 +6,16 @@
 
 {% block body %}
     {% for blog in blogs %}
-        <h1>{{ blog.title }}</h1>
-        <p>By {{ blog.author }} on {{ blog.date_posted }}</p>
-        <p>{{ blog.content }}</p>
+        <article>
+            <img src="{{ url_for('static', filename='profile_pics/' + blog.author.img_file) }}">
+            <div>
+                <div>
+                    <a href="#">{{ blog.author.username }}</a>
+                    <small>{{ blog.date_posted.strftime('%d-%m-%Y') }}</small>
+                </div>
+                <h2><a href="{{ url_for('post', post_id=blog.id) }}">{{ blog.title }}</a></h2>
+                <p>{{ blog.content }}</p>
+            </div>
+        </article>
     {% endfor %}
 {% endblock%}

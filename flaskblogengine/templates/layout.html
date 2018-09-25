@@ -25,6 +25,7 @@
                     {% if current_user.is_authenticated %}
                         <li><a href="{{url_for('logout')}}" target="_self">Sign Out</a></li>
                         <li><a href="{{url_for('account')}}" target="_self">Account</a></li>
+                        <li><a href="{{url_for('new_post')}}" target="_self">New Blog</a></li>
                     {% else %}
                         <li><a href="{{url_for('register')}}" target="_self">Register</a></li>
                         <li><a href="{{url_for('login')}}" target="_self">Login</a></li>

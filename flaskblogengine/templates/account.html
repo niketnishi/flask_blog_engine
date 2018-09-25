@@ -1,9 +1,61 @@
 {% extends "layout.html" %}
 
 {% block heading %}
-    About Page
+<h2>{{ current_user.username }}</h2>
 {% endblock %}
 
 {% block body%}
-<h1>{{ current_user.username }}</h1>
+    <div>
+        <div>
+            <img src="{{ img_file }}">
+            <div>
+                <h2>{{ current_user.username }}</h2>
+                <p>{{ current_user.email }}</p>
+            </div>
+        </div>
+        <form action="" method="post" enctype="multipart/form-data">    <!--enctype in encoding type for proper errors-->
+            {{ account_form.hidden_tag() }}
+            <fieldset>
+                <legend>Account Info</legend>
+                <div>
+                    {{ account_form.username.label }}
+                    {% if account_form.username.errors %}   <!-- Flashing errors during form validation-->
+                        {{ account_form.username(style="border: 1px solid #172c50;") }}
+                        <div>
+                            {% for error in account_form.username.errors%}
+                                <span style="color: red; font-size: 12px;">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ account_form.username }}
+                    {% endif %}
+                </div>
+                <div>
+                    {{ account_form.email.label }}
+                    {% if account_form.email.errors %}
+                        {{ account_form.email(style="border: 1px solid #172c50;") }}
+                        <div>
+                            {% for error in account_form.email.errors%}
+                                <span style="color: red; font-size: 12px;">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ account_form.email }}
+                    {% endif %}
+                </div>
+                <div>
+                    {{ account_form.picture.label }}
+                    {{ account_form.picture }}
+                    {% if account_form.picture.errors %}
+                        {% for error in account_form.picture.errors%}
+                            <span style="color: red; font-size: 12px;">{{ error }}</span></br>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div>
+                {{ account_form.submit }}
+            </div>
+        </form>
+    </div>
 {% endblock %}

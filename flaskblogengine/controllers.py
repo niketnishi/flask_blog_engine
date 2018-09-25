@@ -1,30 +1,19 @@
-from flask import Flask, render_template, request, session, url_for, flash, redirect
+import os
+import secrets  # For creating a random key to save image file
+from PIL import Image   # Resizing images using pillow module to save space on our filesystem
+from flask import Flask, render_template, request, session, url_for, flash, redirect, abort
 from flask_login import login_user, current_user, logout_user, login_required      # Maintains user session
-from flaskblogengine.forms import RegistrationForm, LoginForm   # Importing registration and login classes from forms.py
+from flaskblogengine.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm   # Importing registration and login classes from forms.py
 from flaskblogengine.models import User, Post
 from flaskblogengine import app, db, bcrypt
 # from flask_session import Session
 
 # Session(app)
 
-posts = [
-    {
-        'author': 'Niket Nishi',
-        'title': 'Blog Post 1',
-        'content': 'First post content',
-        'date_posted': 'Sept 22, 2018'
-    },
-    {
-        'author': 'Antony CS',
-        'title': 'Blog Post 2',
-        'content': 'Second post content',
-        'date_posted': 'Sept 23, 2018'
-    }
-]
-
 
 @app.route("/")
 def home():
+    posts = Post.query.all()
     return render_template('home.html', blogs=posts)
 
 
@@ -73,7 +62,85 @@ def logout():
     return redirect(url_for("home"))
 
 
-@app.route("/account")
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)       # Creating hex token of 8 bytes
+    _, f_ext = os.path.splitext(form_picture.filename)      # '_' is used to throw away an unused variable in python
+    picture_fn = random_hex + f_ext     # creating file name with the given file extension
+    picture_full_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+
+    output_size = (125, 125)
+    new_img = Image.open(form_picture)      # Using PIL module here
+    new_img.thumbnail(output_size)      # Converting the image to 125 X 125px
+
+    new_img.save(picture_full_path)     # Saving the new converted image
+    return picture_fn
+
+
+@app.route("/account", methods=['GET', 'POST'])
 @login_required     # This decorator is used to prevent accessing page when trying to access account
 def account():
-    return render_template('account.html', title='Account')
+    account_form = UpdateAccountForm()
+    if account_form.validate_on_submit():       # On submission of account info form we update the database.
+        if account_form.picture.data:
+            picture_file = save_picture(account_form.picture.data)
+            current_user.img_file = picture_file
+        current_user.username = account_form.username.data
+        current_user.email = account_form.email.data
+        db.session.commit()
+        flash('Your account has been updated', 'success')
+        return redirect(url_for('account'))
+    elif request.method == 'GET':       # Writing default username and email in the account form
+        account_form.username.data = current_user.username
+        account_form.email.data = current_user.email
+    image_file = url_for('static', filename='profile_pics/' + current_user.img_file)
+    return render_template('account.html', title='Account', img_file=image_file, account_form=account_form)
+
+
+@app.route("/post/new", methods=['GET', 'POST'])
+@login_required
+def new_post():
+    new_blog_form = PostForm()
+    if new_blog_form.validate_on_submit():
+        post = Post(title=new_blog_form.title.data, content=new_blog_form.content.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your blog has been posted!', 'success')
+        return redirect(url_for('home'))
+    return render_template('create_post.html', title='New Blog', new_blog_obj=new_blog_form, legend='New Post')
+
+
+@app.route("/post/<int:post_id>")
+def post(post_id):
+    post = Post.query.get_or_404(post_id)
+    return render_template('blog.html', tiltle=post.title, blog=post)
+
+
+@app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
+@login_required
+def update_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.content = form.content.data
+        db.session.commit()
+        flash('You Blog has been updated and posted successfully.', 'success')
+        return redirect(url_for('post', post_id=post.id))
+    elif request.method == 'GET':
+        form.title.data = post.title
+        form.content.data = post.content
+    return render_template('create_post.html', title='Update Blog', new_blog_obj=form, legend='Update Blog')
+
+
+@app.route("/post/<int:post_id>/delete", methods=['POST'])
+@login_required
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    db.session.delete(post)
+    db.session.commit()
+    flash('Your blog has been deleted from our records.')
+    return redirect(url_for('home'))

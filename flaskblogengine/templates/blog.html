@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block heading %}
+    Your Blogs!!!
+{% endblock %}
+
+{% block body %}
+    <article>
+        <img src="{{ url_for('static', filename='profile_pics/' + blog.author.img_file) }}">
+        <div>
+            <div>
+                <a href="#">{{ blog.author.username }}</a>
+                <small>{{ blog.date_posted.strftime('%d-%m-%Y') }}</small>
+                {% if blog.author == current_user %}
+                    <div>
+                        <a href="{{ url_for('update_post', post_id=blog.id)}}"><button type="button">Update</button></a>
+                        <form action="{{ url_for('delete_post', post_id=blog.id) }}" method="POST" style="display: inline-block;">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+            <h2>{{ blog.title }}</h2>
+            <p>{{ blog.content }}</p>
+        </div>
+    </article>
+{% endblock%}
