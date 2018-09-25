@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, session, url_for, flash, redirect
+from flask_login import login_user, current_user, logout_user, login_required      # Maintains user session
 from flaskblogengine.forms import RegistrationForm, LoginForm   # Importing registration and login classes from forms.py
 from flaskblogengine.models import User, Post
 from flaskblogengine import app, db, bcrypt
 # from flask_session import Session
-from flask_login import login_user      # Maintains user session
 
 # Session(app)
 
@@ -35,6 +35,8 @@ def about():
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
     form_obj = RegistrationForm()
     if form_obj.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form_obj.password.data).decode('utf-8')
@@ -48,14 +50,30 @@ def register():
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
     form_obj = LoginForm()
     if form_obj.validate_on_submit():
         user = User.query.filter_by(email=form_obj.email.data).first()
-        # if form_obj.email.data == 'niketnishi@gmail.com' and form_obj.password.data == 'password':
+
         if user and bcrypt.check_password_hash(user.password, form_obj.password.data):
             login_user(user, remember=form_obj.remember.data)
+            # Trying to access a page directly which needs login then it stores the url you are requesting and redirects to the page you are requesting after login.
+            next_page = request.args.get('next')
         #     flash(f'You have logged in successfully!', 'success')      # Flashes a message on submission
-            return redirect(url_for('home'))
+            return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
             flash('Incorrect Username or Password!', 'danger')
     return render_template('login.html', title='Login', form=form_obj)
+
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for("home"))
+
+
+@app.route("/account")
+@login_required     # This decorator is used to prevent accessing page when trying to access account
+def account():
+    return render_template('account.html', title='Account')
