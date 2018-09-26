@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block body%}
-    <div>
+    <div class="container">
         <form action="" method="post">
             {{ new_blog_obj.hidden_tag() }}
             <fieldset>
@@ -38,7 +38,7 @@
                 </div>
             </fieldset>
             <div>
-                {{ new_blog_obj.submit }}
+                {{ new_blog_obj.submit(class="btn info") }}
             </div>
         </form>
     </div>

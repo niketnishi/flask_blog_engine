@@ -6,8 +6,8 @@
 
 {% block body %}
     {% for blog in blogs %}
-        <article>
-            <img src="{{ url_for('static', filename='profile_pics/' + blog.author.img_file) }}">
+        <article class="container">
+            <img class="profile-pic" src="{{ url_for('static', filename='profile_pics/' + blog.author.img_file) }}">
             <div>
                 <div>
                     <a href="#">{{ blog.author.username }}</a>

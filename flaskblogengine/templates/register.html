@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block body%}
-    <div>
+    <div class="container">
         <form action="" method="post">
             {{ form.hidden_tag() }}
             <fieldset>
@@ -64,13 +64,13 @@
                 </div>
             </fieldset>
             <div>
-                {{ form.submit }}
+                {{ form.submit(class="btn") }}
             </div>
         </form>
-    </div>
-    <div>
-        <small>
-            Already Have An Account? <a style="margin-left: 2px;" href="{{ url_for('login') }}">Sign In</a>
-        </small>
+        <div>
+            <small>
+                Already Have An Account? <a style="margin-left: 2px;" href="{{ url_for('login') }}">Sign In</a>
+            </small>
+        </div>
     </div>
 {% endblock %}

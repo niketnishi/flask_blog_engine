@@ -5,10 +5,10 @@
 {% endblock %}
 
 {% block body%}
-    <div>
+    <div class="container">
         <div>
-            <img src="{{ img_file }}">
-            <div>
+            <img class="profile-pic" src="{{ img_file }}">
+            <div class="">
                 <h2>{{ current_user.username }}</h2>
                 <p>{{ current_user.email }}</p>
             </div>
@@ -54,7 +54,7 @@
                 </div>
             </fieldset>
             <div>
-                {{ account_form.submit }}
+                {{ account_form.submit(class="btn info") }}
             </div>
         </form>
     </div>
