@@ -78,6 +78,7 @@ nav h2 {
     margin: 30px;
 }
 .profile-pic {
+    width: 125px;
     border-radius: 50%;
     float: left;
     margin: 2px 10px 10px 10px;

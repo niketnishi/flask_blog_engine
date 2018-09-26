@@ -32,8 +32,13 @@
                     {% endif %}
                     <li><a href="{{url_for('about')}}" target="_self">About</a></li>
                     <li><a href="{{url_for('home')}}" target="_self">Home</a></li>
+                    <li>
+                        <form action="{{ url_for('search') }}" method="GET">
+                            <input type="text" name="search" placeholder="Search Blog...", style="padding:10px;">
+                            <input type="submit" name="submit" value="Submit">
+                        </form>
+                    </li>
                 </ul>
-
             </nav>
         </header>
         <section class="blog">

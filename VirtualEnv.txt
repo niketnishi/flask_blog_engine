@@ -30,3 +30,18 @@ pip install -r requirements.txt
 
 # pip - Creating requirements.txt
 pip freeze > requirements.txt
+
+
+<!--<form action="{{ url_for('search', text=search.text.data) }}" method="GET">-->
+    <!--{% if search.text.errors %}   &lt;!&ndash; Flashing errors during form validation&ndash;&gt;-->
+        <!--{{ search.text(placeholder="Search Blog...", style="padding:10px;border: 1px solid #172c50;") }}-->
+        <!--<div>-->
+            <!--{% for error in search.text.errors%}-->
+                <!--<span style="color: red; font-size: 12px;">{{ error }}</span>-->
+            <!--{% endfor %}-->
+        <!--</div>-->
+    <!--{% else %}-->
+        <!--{{ search.text(placeholder="Search Blog...", style="padding:10px;") }}-->
+    <!--{% endif %}-->
+    <!--{{ search.submit }}-->
+<!--</form>-->

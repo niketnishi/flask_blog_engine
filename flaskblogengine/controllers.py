@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, session, url_for, flash, redi
 from flask_login import login_user, current_user, logout_user, login_required      # Maintains user session
 from flaskblogengine.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm   # Importing registration and login classes from forms.py
 from flaskblogengine.models import User, Post
-from flaskblogengine import app, db, bcrypt
+from flaskblogengine import app, db, bcrypt, es
 # from flask_session import Session
 
 # Session(app)
@@ -15,6 +15,17 @@ from flaskblogengine import app, db, bcrypt
 def home():
     posts = Post.query.all()
     return render_template('home.html', blogs=posts)
+
+
+@app.route("/search", methods=['GET'])
+def search():
+    search_txt = request.args.get('search')
+    conf_submit = request.args.get('submit')
+    if conf_submit == 'Submit':
+        flash("Your search result", 'success')
+        flash(es.search(index='post_index', doc_type='post_index', body = {'query': {'match': {'text': search_txt}}}), 'success')
+
+    return render_template('home.html')
 
 
 @app.route("/about")
@@ -104,6 +115,7 @@ def new_post():
         post = Post(title=new_blog_form.title.data, content=new_blog_form.content.data, author=current_user)
         db.session.add(post)
         db.session.commit()
+        es.index(index='post_index', doc_type='post_index', id=post.id, body={'text': post.content})
         flash('Your blog has been posted!', 'success')
         return redirect(url_for('home'))
     return render_template('create_post.html', title='New Blog', new_blog_obj=new_blog_form, legend='New Post')
