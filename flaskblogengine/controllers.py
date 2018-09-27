@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, session, url_for, flash, redi
 from flask_login import login_user, current_user, logout_user, login_required      # Maintains user session
 from flaskblogengine.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm   # Importing registration and login classes from forms.py
 from flaskblogengine.models import User, Post
-from flaskblogengine import app, db, bcrypt, es
+from flaskblogengine import app, db, bcrypt
 # from flask_session import Session
 
 # Session(app)
@@ -15,32 +15,6 @@ from flaskblogengine import app, db, bcrypt, es
 def home():
     posts = Post.query.all()    # Returns list of all records of Post
     return render_template('home.html', blogs=posts)
-
-
-@app.route("/search", methods=['GET'])
-def search():
-    search_txt = request.args.get('search')
-    conf_submit = request.args.get('submit')
-    lst_of_id = []
-    if conf_submit == 'Submit':
-        # Searching text in 'post_index' of elasticsearch
-        search_list = es.search(index='post_index', doc_type='post_index',
-                                body = {'query': {'match': {'text': search_txt}}})['hits']['hits']
-        if search_list:
-            flash(f"Search Result for '{search_txt}'", 'success')
-            for result in search_list:
-                lst_of_id.append(int(result.get('_id')))
-            for post_id in lst_of_id:
-                lst_of_id[lst_of_id.index(post_id)] = Post.query.get_or_404(post_id)
-            # flash(lst_of_id)
-            return render_template('home.html', title='Search Result', blogs=lst_of_id)
-        else:
-            flash("Your Search Do Not Match Any of Our Records", 'info')
-            return redirect(url_for('home'))
-    else:
-        flash("Please submit to get the results...", 'danger')
-        return redirect(url_for('home'))
-
 
 @app.route("/about")
 def about():
@@ -129,7 +103,6 @@ def new_post():
         post = Post(title=new_blog_form.title.data, content=new_blog_form.content.data, author=current_user)
         db.session.add(post)
         db.session.commit()
-        es.index(index='post_index', doc_type='post_index', id=post.id, body={'text': post.content})
         flash('Your blog has been posted!', 'success')
         return redirect(url_for('home'))
     return render_template('create_post.html', title='New Blog', new_blog_obj=new_blog_form, legend='New Post')
@@ -166,8 +139,6 @@ def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
         abort(403)
-    es.delete(index='post_index', doc_type='post_index', id=post_id, ignore=['400', '404'])
-    # es.indices.delete('post_index')   --> Delete the index completely
     db.session.delete(post)
     db.session.commit()
     flash('Your blog has been deleted from our records.')

@@ -2,7 +2,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt     # Using it for encrypting password and saving to database for security
 from flask_login import LoginManager    # Used to manage login and sessions
-from elasticsearch import Elasticsearch
 
 
 app = Flask(__name__)
@@ -15,6 +14,5 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'      # For making the '@login_required' work here 'login' is the function name
 login_manager.login_message_category = 'info'   # Sending the message category
-es = Elasticsearch('http://localhost:9200')
 
 from flaskblogengine import controllers     # import here since there may be a chance that it goes in to circular import
