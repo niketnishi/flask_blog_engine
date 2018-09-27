@@ -1,0 +1,15 @@
+Install java 8
+--> sudo apt install openjdk-8-jre
+--> sudo apt install openjdk-8-jdk
+
+Download and install elasticsearch on linux not on virtual environment
+--> wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.2.deb
+--> dpkg -i elasticsearch-6.3.2.deb
+
+After installation configure /etc/elasticsearch/elasticsearch.yml and uncomment all the configured lines
+--> cluster.name: flask_blog_engine
+--> node.name: blogs
+--> path.data: /var/lib/elasticsearch
+--> path.logs: /var/log/elasticsearch
+--> network.host: 127.0.0.1
+--> http.port: 9200

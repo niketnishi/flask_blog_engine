@@ -13,7 +13,7 @@ from flaskblogengine import app, db, bcrypt, es
 
 @app.route("/")
 def home():
-    posts = Post.query.all()
+    posts = Post.query.all()    # Returns list of all records of Post
     return render_template('home.html', blogs=posts)
 
 
@@ -21,11 +21,25 @@ def home():
 def search():
     search_txt = request.args.get('search')
     conf_submit = request.args.get('submit')
+    lst_of_id = []
     if conf_submit == 'Submit':
-        flash("Your search result", 'success')
-        flash(es.search(index='post_index', doc_type='post_index', body = {'query': {'match': {'text': search_txt}}}), 'success')
-
-    return render_template('home.html')
+        # Searching text in 'post_index' of elasticsearch
+        search_list = es.search(index='post_index', doc_type='post_index',
+                                body = {'query': {'match': {'text': search_txt}}})['hits']['hits']
+        if search_list:
+            flash(f"Search Result for '{search_txt}'", 'success')
+            for result in search_list:
+                lst_of_id.append(int(result.get('_id')))
+            for post_id in lst_of_id:
+                lst_of_id[lst_of_id.index(post_id)] = Post.query.get_or_404(post_id)
+            # flash(lst_of_id)
+            return render_template('home.html', title='Search Result', blogs=lst_of_id)
+        else:
+            flash("Your Search Do Not Match Any of Our Records", 'info')
+            return redirect(url_for('home'))
+    else:
+        flash("Please submit to get the results...", 'danger')
+        return redirect(url_for('home'))
 
 
 @app.route("/about")
@@ -152,6 +166,8 @@ def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
         abort(403)
+    es.delete(index='post_index', doc_type='post_index', id=post_id, ignore=['400', '404'])
+    # es.indices.delete('post_index')   --> Delete the index completely
     db.session.delete(post)
     db.session.commit()
     flash('Your blog has been deleted from our records.')
