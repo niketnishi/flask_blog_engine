@@ -1,0 +1,29 @@
+1. The Celery client.
+    This is used to issue background jobs. When working with Flask, the client runs with the Flask application.
+
+2. The Celery workers.
+    These are the processes that run the background jobs. Celery supports local and remote workers, so you can start
+    with a single worker running on the same machine as the Flask server, and later add more workers as the needs of
+    your application grow.
+
+3. The message broker.
+    The client communicates with the the workers through a message queue, and Celery supports several ways to implement
+    these queues. The most commonly used brokers are RabbitMQ and Redis.
+
+Install celery client on Virtual Environment
+--> pip install celery
+
+Configure celery for flask
+--> app.config['CELERY_BROKER_URL'] = 'amqp://'    (This URL tells Celery where the broker service is running)
+--> app.config['CELERY_RESULT_BACKEND'] = 'amqp://
+--> celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])   # Running celery client with Flask application
+--> celery.conf.update(app.config)
+
+Install the message broker RabbitMQ or Redis    (Using RabbitMQ Here)
+--> sudo apt-get install rabbitmq-server
+
+Run celery worker and flask in two different terminal
+--> celery worker -A flaskblogengine.celery --loglevel=info     (celery worker -A project_name.celery_obj --loglevel=info)
+
+More Info at
+--> https://blog.miguelgrinberg.com/post/using-celery-with-flask

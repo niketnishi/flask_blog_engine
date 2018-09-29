@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, session, url_for, flash, redi
 from flask_login import login_user, current_user, logout_user, login_required      # Maintains user session
 from flaskblogengine.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm   # Importing registration and login classes from forms.py
 from flaskblogengine.models import User, Post
-from flaskblogengine import app, db, bcrypt, es
+from flaskblogengine import app, db, bcrypt, es, celery
 # from flask_session import Session
 
 # Session(app)
@@ -40,6 +40,14 @@ def search():
     else:
         flash("Please submit to get the results...", 'danger')
         return redirect(url_for('home'))
+
+
+@celery.task
+def download_blog(blog):
+    file = open("./flaskblogengine/static/blog_content/export_blog.txt", 'w')
+    file.write(blog)
+    file.close()
+    return
 
 
 @app.route("/about")
@@ -138,6 +146,8 @@ def new_post():
 @app.route("/post/<int:post_id>")
 def post(post_id):
     post = Post.query.get_or_404(post_id)
+    blog_content = post.title + '\t\t' + 'By ' + post.author.username + ' ' + post.date_posted.strftime('%d-%m-%Y') + '\n\n' + post.content
+    download_blog.delay(blog_content)
     return render_template('blog.html', tiltle=post.title, blog=post)
 
 

@@ -45,3 +45,5 @@ pip freeze > requirements.txt
     <!--{% endif %}-->
     <!--{{ search.submit }}-->
 <!--</form>-->
+
+--> Response(content, mimetype="text/plain", headers={"Content-Disposition":"attachment;filename=test.txt"})
