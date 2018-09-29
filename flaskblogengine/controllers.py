@@ -14,6 +14,7 @@ from flaskblogengine import app, db, bcrypt, es, celery
 @app.route("/")
 def home():
     posts = Post.query.all()    # Returns list of all records of Post
+    posts = posts[::-1]     # Reversing a list
     return render_template('home.html', blogs=posts)
 
 
