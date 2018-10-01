@@ -17,6 +17,8 @@ After installation configure /etc/elasticsearch/elasticsearch.yml and uncomment 
 --> sudo apt-get --purge autoremove elasticsearch   (Remove elastic search completely)
 
 AWS Deployment
+
+After creating an instance on AWS and you obtain a private key to that instance.
 --> chmod 0400 flask_aws.pem    (for private key downloaded)
 --> ssh -i "flask_aws.pem" ubuntu@ec2-54-245-40-241.us-west-2.compute.amazonaws.com
 --> sudo -i (for root access)
@@ -53,3 +55,7 @@ AWS Deployment
     }
 --> sudo nginx -t
 --> sudo service nginx restart  (Restart your web server)
+
+More info:
+--> https://medium.com/ymedialabs-innovation/deploy-flask-app-with-nginx-using-gunicorn-and-supervisor-d7a93aa07c18
+--> https://www.expeditedssl.com/aws-in-plain-english

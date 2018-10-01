@@ -7,7 +7,7 @@
 {% block body %}
     <article class="container">
         <img class="profile-pic" src="{{ url_for('static', filename='profile_pics/' + blog.author.img_file) }}">
-        <a href="{{ url_for('static', filename='blog_content/export_blog.txt') }}" download><i class="fa fa-download" style="float:right;font-size:30px;" title="Export this blog to text file"></i></a>
+        <a href="{{ url_for('static', filename='blog_content/export_blog.txt') }}" download="{{ blog.title }}"><i class="fa fa-download" style="float:right;font-size:30px;" title="Export this blog to text file"></i></a>
         <div>
             <div>
                 <a href="#">{{ blog.author.username }}</a>
