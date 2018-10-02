@@ -1,5 +1,6 @@
 import os
 import secrets  # For creating a random key to save image file
+import Image
 from PIL import Image   # Resizing images using pillow module to save space on our filesystem
 from flask import Flask, render_template, request, session, url_for, flash, redirect, abort
 from flask_login import login_user, current_user, logout_user, login_required      # Maintains user session
