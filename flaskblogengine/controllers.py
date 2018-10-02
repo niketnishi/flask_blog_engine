@@ -1,7 +1,7 @@
 import os
 import secrets  # For creating a random key to save image file
 from PIL import Image   # Resizing images using pillow module to save space on our filesystem
-from flask import Flask, render_template, request, session, url_for, flash, redirect, abort
+from flask import Flask, render_template, request, session, url_for, flash, redirect, abort, Response
 from flask_login import login_user, current_user, logout_user, login_required      # Maintains user session
 from flaskblogengine.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm   # Importing registration and login classes from forms.py
 from flaskblogengine.models import User, Post
@@ -22,19 +22,15 @@ def home():
 def search():
     search_txt = request.args.get('search')
     conf_submit = request.args.get('submit')
-    lst_of_id = []
     if conf_submit == 'Submit':
         # Searching text in 'post_index' of elasticsearch
         search_list = es.search(index='post_index', doc_type='post_index',
-                                body = {'query': {'match': {'text': search_txt}}})['hits']['hits']
+                                body = {'query': {'multi_match': {'query': search_txt, 'fields': ['author', 'title', 'content']}}})['hits']['hits']
+
+        # flash(search_list, 'danger')
         if search_list:
             flash(f"Search Result for '{search_txt}'", 'success')
-            for result in search_list:
-                lst_of_id.append(int(result.get('_id')))
-            for post_id in lst_of_id:
-                lst_of_id[lst_of_id.index(post_id)] = Post.query.get_or_404(post_id)
-            # flash(lst_of_id)
-            return render_template('home.html', title='Search Result', blogs=lst_of_id)
+            return render_template('search-result.html', title='Search Result', results=search_list)
         else:
             flash("Your Search Do Not Match Any of Our Records", 'info')
             return redirect(url_for('home'))
@@ -43,12 +39,13 @@ def search():
         return redirect(url_for('home'))
 
 
+@app.route('/post/<int:post_id>/export')
 @celery.task
-def download_blog(blog):
-    file = open("./flaskblogengine/static/blog_content/export_blog.txt", 'w')
-    file.write(blog)
-    file.close()
-    return
+def download_blog(post_id):
+    post = Post.query.get_or_404(post_id)
+    blog_content = post.title + '\t\t' + 'By ' + post.author.username + ' ' + post.date_posted.strftime('%d-%m-%Y') + '\n\n' + post.content
+    blog_name = post.title.lower().replace(' ', '_') + '.txt'
+    return Response(blog_content, mimetype="text/plain", headers={"Content-Disposition":"attachment;filename={}".format(blog_name)})
 
 
 @app.route("/about")
@@ -138,7 +135,10 @@ def new_post():
         post = Post(title=new_blog_form.title.data, content=new_blog_form.content.data, author=current_user)
         db.session.add(post)
         db.session.commit()
-        es.index(index='post_index', doc_type='post_index', id=post.id, body={'text': post.content})
+        es.index(index='post_index', doc_type='post_index', id=post.id, body={'author': post.author.username,
+                                                                              'title': post.title,
+                                                                              'content': post.content,
+                                                                              'date_posted': post.date_posted.strftime('%d-%m-%Y')})
         flash('Your blog has been posted!', 'success')
         return redirect(url_for('home'))
     return render_template('create_post.html', title='New Blog', new_blog_obj=new_blog_form, legend='New Post')
@@ -147,8 +147,6 @@ def new_post():
 @app.route("/post/<int:post_id>")
 def post(post_id):
     post = Post.query.get_or_404(post_id)
-    blog_content = post.title + '\t\t' + 'By ' + post.author.username + ' ' + post.date_posted.strftime('%d-%m-%Y') + '\n\n' + post.content
-    download_blog.delay(blog_content)
     return render_template('blog.html', tiltle=post.title, blog=post)
 
 

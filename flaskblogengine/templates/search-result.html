@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block heading %}
+    Search Result
+{% endblock %}
+
+{% block body%}
+    {% for blog in results %}
+        <div class="container">
+            <a href="#">{{ blog.get('_source').get('author') }}</a>
+            <small>{{ blog.get('_source').get('date_posted') }}</small>
+            <h2><a href="{{ url_for('post', post_id=blog.get('_id')) }}">{{ blog.get('_source').get('title') }}</a></h2>
+            <p>{{ blog.get('_source').get('content') }}</p>
+        </div>
+    {% endfor %}
+{% endblock %}
