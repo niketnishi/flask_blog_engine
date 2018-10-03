@@ -39,13 +39,20 @@ def search():
         return redirect(url_for('home'))
 
 
-@app.route('/post/<int:post_id>/export')
 @celery.task
 def download_blog(post_id):
     post = Post.query.get_or_404(post_id)
     blog_content = post.title + '\t\t' + 'By ' + post.author.username + ' ' + post.date_posted.strftime('%d-%m-%Y') + '\n\n' + post.content
     blog_name = post.title.lower().replace(' ', '_') + '.txt'
-    return Response(blog_content, mimetype="text/plain", headers={"Content-Disposition":"attachment;filename={}".format(blog_name)})
+    return (blog_content, blog_name)
+
+
+@app.route('/post/<int:post_id>/export')
+def export(post_id):
+    result = download_blog.delay(post_id)
+    file_content, file_name = result.wait()
+    return Response(file_content, mimetype="text/plain",
+                    headers={"Content-Disposition": "attachment;filename={}".format(file_name)})
 
 
 @app.route("/about")
