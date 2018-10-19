@@ -9,6 +9,7 @@ After creating an instance on AWS and you obtain a private key to that instance.
 --> sudo apt-get install nginx supervisor python3-pip python3-virtualenv
 --> apt install virtualenv
 --> virtualenv .flask_blog_aws
+--> virtualenv -p python3 .flask_blog_aws   (In case of python 3 virtual env)
 --> source .flask_blog_aws/bin/activate
 --> clone your repository to this machine
 --> cd <to the cloned directory>
