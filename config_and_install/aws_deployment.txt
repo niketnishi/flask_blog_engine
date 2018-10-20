@@ -24,6 +24,16 @@ After creating an instance on AWS and you obtain a private key to that instance.
     stderr_logfile=/var/log/flask_blog/flask_blog.err.log
     stdout_logfile=/var/log/flask_blog/flask_blog.out.log
 
+    Congiguration for django deployment
+
+    [program:servizio]
+    directory=/home/ubuntu/servizio
+    command=/home/ubuntu/.virtualenv/servizio/bin/gunicorn servizio.wsgi:application -b localhost:8000
+    autostart=true
+    autorestart=true
+    stderr_logfile=/var/log/servizio/servizio.err.log
+    stdout_logfile=/var/log/servizio/servizio.out.log
+
 --> sudo supervisorctl reread
 --> sudo service supervisor restart
 --> sudo supervisorctl status
